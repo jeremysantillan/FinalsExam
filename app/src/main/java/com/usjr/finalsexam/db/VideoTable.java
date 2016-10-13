@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
 import com.usjr.finalsexam.entity.Video;
@@ -11,7 +12,7 @@ import com.usjr.finalsexam.entity.Video;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VideoTable {
+public class VideoTable{
 
     /**
      * Inner class that defines video table contents.
@@ -52,7 +53,19 @@ public class VideoTable {
 
     private static Video createVideoFromCursor(Cursor cursor) {
         // TODO: Implement this method
-        return null;
+        Video video = null;
+        try{
+            video = new Video();
+            video.setId(cursor.getString(0));
+            video.setTitle(cursor.getString(1));
+            video.setDescription(cursor.getString(2));
+            video.setThumbnailUrl(cursor.getString(3));
+
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return video;
     }
 
     public static long insertVideo(Context context, Video video) {
@@ -113,7 +126,6 @@ public class VideoTable {
                 cursor.close();
             }
         }
-
         return count;
     }
 
@@ -121,9 +133,17 @@ public class VideoTable {
         List<Video> videos = new ArrayList<>();
         SQLiteDatabase db = null;
         Cursor cursor = null;
-
         try {
             // TODO: Implement retrieval of all video items from the database
+            db = DbHandler.getInstance(context).getWritableDatabase();
+            cursor = db.rawQuery(SELECT_QUERY, null);
+
+            if(cursor.moveToFirst()){
+                do{
+                    videos.add(createVideoFromCursor(cursor));
+                }while(cursor.moveToNext());
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -134,7 +154,6 @@ public class VideoTable {
                 cursor.close();
             }
         }
-
         return videos;
     }
 }
